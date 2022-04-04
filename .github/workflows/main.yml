@@ -1,12 +1,23 @@
-name: action1
-on: [push]
+name: Deploy Lambda
+
+on:
+  pull_request:
+    types: [closed]
+      branches:
+        - master
+
 jobs:
-  check-bats-version:
+  deploy-lambda:
+    if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@master
+      - run: echo "THIS IS A TEST PACKAGE" > file.txt
+      - run: zip lambda.zip file.txt
+      - uses: yvesgurcan/deploy-lambda-function
         with:
-          node-version: '14'
-      - run: npm install -g bats
-      - run: bats -v
+          package: lambda.zip
+          function-name: atividade4
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          AWS_SECRET_ID: ${{ secrets.AWS_SECRET_ID }}
+          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
