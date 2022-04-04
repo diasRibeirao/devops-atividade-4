@@ -1,22 +1,30 @@
-name: Update lambda
+name: Deploy 
 
-on:
-  release:
-    types: ["published"]
+on: 
+  push:   
+    branches:  
+    - master   
 
-jobs:
-  update_lambda:
-    name: 'Pull code & update lambda'
-    runs-on: ubuntu-latest
+jobs:  
+  deploy_lambda:
+    runs-on: ubuntu-latest 
     steps:
-      - uses: actions/checkout@v2
-
-      - uses: diasRibeirao/devops-atividade-4@master
-        name: Update lambda code
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - uses: actions/checkout@v2  
+      - uses: actions/setup-node@v2 
+        with:  
+          node-version: '14' 
+      - name: Configure AWS Credentials  
+        uses: aws-actions/configure-aws-credentials@v1 
         with:
-          function_name: lambda_devops
-          region: us-east-1
-        
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }} 
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 
+      - name: npm install
+        env:
+          CI: true
+        run: |
+          npm ci 
+      - name: deploy
+        run: |
+          zip -j deploy.zip ./*
+          aws lambda update-function-code --function-name=lambda_devops --zip-file=fileb://deploy.zip 
