@@ -1,19 +1,23 @@
-name: Deploy Lambda
+name: Deploy lambda 
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
-  deploy-lambda:
-    if: github.event.pull_request.merged
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
-      - run: echo "THIS IS A TEST PACKAGE" > file.txt
-      - run: zip lambda.zip file.txt
-      - uses: yvesgurcan/deploy-lambda-function
-        with:
-          package: lambda.zip
-          function-name: atividade4
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          AWS_SECRET_ID: ${{ secrets.AWS_SECRET_ID }}
-          AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}
+    - uses: actions/checkout@master
+    - name: Deploy code to Lambda
+      uses: denzalman/lambda-python-action@v2.0.0
+      with:
+        lambda_layer_arn: 'arn:aws:lambda:us-east-1:<AWS_ACCOUNT_ID>:layer:<atividade4>'
+        lambda_function_name: 'atividade4'
+        lambda_region: 'us-east-1'
+        requirements_txt: 'requirements.txt'
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        
