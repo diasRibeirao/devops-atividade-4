@@ -1,19 +1,22 @@
-name: deploy to lambda
-on: [push]
-jobs:
+name: Update lambda
 
-  deploy:
-    name: deploy lambda function
+on:
+  release:
+    types: ["published"]
+
+jobs:
+  update_lambda:
+    name: 'Pull code & update lambda'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - name: AWS Lambda Deploy
-      uses: diasRibeirao/devops-atividade-4@master
-      with:
-        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws_region: ${{ secrets.AWS_REGION }}
-        function_name: lambda_devops
-        zip_file: output.zip
-        dry_run: true
+      - uses: actions/checkout@v2
+
+      - uses: diasRibeirao/devops-atividade-4@master
+        name: Update lambda code
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+          function_name: lambda_devops
+          region: us-east-1
         
